@@ -251,6 +251,28 @@ struct ScopedFunctor{F}
 end
 (sf::ScopedFunctor)() = @enter_scope sf.scope sf.f()
 
+"""
+    getval(val::ScopedValue{T})::Union{Nothing, T}
+
+Non-allocating version of [`get`](@ref). Does not use `Some`.
+"""
+function getval(val::ScopedValue{T}) where {T}
+    # Inline current_scope to avoid doing the type assertion twice.
+    scope = current_scope()
+    if scope === nothing
+        isassigned(val) && return val.default
+        return nothing
+    end
+    scope = scope::Scope
+    if isassigned(val)
+        return Base.get(scope.values, val, val.default)::T
+    else
+        v = Base.get(scope.values, val, novalue)
+        v === novalue || return v::T
+    end
+    return nothing
+end
+
 @deprecate scoped with
 
 end # module ScopedValues
