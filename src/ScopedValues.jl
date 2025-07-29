@@ -273,6 +273,28 @@ function getval(val::ScopedValue{T}) where {T}
     return nothing
 end
 
+"""
+    getval(sf::ScopedFunctor, val::ScopedValue{T})::Union{Nothing, T}
+
+Returns the set scoped value, the default value, or `nothing`
+from the scope in the specified `ScopedFunctor`.
+"""
+function getval(sf::ScopedFunctor, val::ScopedValue{T}) where {T}
+    scope = sf.scope
+    if scope === nothing
+        isassigned(val) && return val.default
+        return nothing
+    end
+    scope = scope::Scope
+    if isassigned(val)
+        return Base.get(scope.values, val, val.default)::T
+    else
+        v = Base.get(scope.values, val, novalue)
+        v === novalue || return v::T
+    end
+    return nothing
+end
+
 @deprecate scoped with
 
 end # module ScopedValues
