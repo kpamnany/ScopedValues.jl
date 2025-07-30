@@ -251,6 +251,22 @@ struct ScopedFunctor{F}
 end
 (sf::ScopedFunctor)() = @enter_scope sf.scope sf.f()
 
+function get(val::ScopedValue{T}, default::T) where {T}
+    scope = current_scope()
+    if scope === nothing
+        isassigned(val) && return val.default
+        return default
+    end
+    scope = scope::Scope
+    if isassigned(val)
+        return Base.get(scope.values, val, val.default)::T
+    else
+        v = Base.get(scope.values, val, novalue)
+        v === novalue || return v::T
+    end
+    return default
+end
+
 """
     getval(val::ScopedValue{T})::Union{Nothing, T}
 
