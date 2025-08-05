@@ -4,7 +4,7 @@ export ScopedValue, with, @with, ScopedFunctor
 
 if isdefined(Base, :ScopedValues)
 
-import Base.ScopedValues: ScopedValue, with, @with, Scope, get
+import Base.ScopedValues: ScopedValue, with, @with, Scope, get, novalue
 import Core: current_scope
 
 macro enter_scope(scope, expr)
