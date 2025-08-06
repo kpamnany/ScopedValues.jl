@@ -271,14 +271,13 @@ end
 Non-allocating version of [`get`](@ref). Does not use `Some`.
 """
 function getval(val::ScopedValue{T}) where {T}
-    # Inline current_scope to avoid doing the type assertion twice.
-    scope = current_scope()
+    scope = current_scope()::Union{Scope, Nothing}
     if scope === nothing
-        isassigned(val) && return val.default
+        val.has_default && return val.default
         return nothing
     end
     scope = scope::Scope
-    if isassigned(val)
+    if val.has_default
         return Base.get(scope.values, val, val.default)::T
     else
         v = Base.get(scope.values, val, novalue)
